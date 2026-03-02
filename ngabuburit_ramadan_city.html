@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ngabuburit Simulator - Ramadan City</title>
+<style>
+body{margin:0;overflow:hidden;background:#111;font-family:sans-serif}
+#game{width:100vw;height:100vh;overflow:hidden;position:relative}
+#world{width:3000px;height:3000px;position:absolute;background:linear-gradient(#f97316,#fde68a,#86efac)}
+.player{width:40px;height:60px;position:absolute;background:#2563eb;border-radius:10px}
+.motor{width:70px;height:40px;position:absolute;background:#dc2626;border-radius:10px}
+.npc{position:absolute;font-size:30px}
+.ui{position:fixed;top:0;left:0;width:100%;background:rgba(0,0,0,0.6);color:white;padding:10px;font-size:14px;z-index:10}
+</style>
+</head>
+<body>
+
+<div class="ui">
+⏰ Waktu: <span id="timer">240</span> |
+⚡ Energi: <span id="energy">100</span> |
+⭐ Pahala: <span id="score">0</span> |
+💰 Uang: <span id="money">30</span> |
+🏍️ Motor: <span id="motorStatus">Tidak</span>
+<br>Gerak: WASD / Arrow | Interaksi: Tekan E
+</div>
+
+<div id="game">
+  <div id="world">
+    <div id="player" class="player"></div>
+    <div id="motor" class="motor" style="left:1200px;top:1200px"></div>
+
+    <div class="npc" style="left:400px;top:300px">🕌</div>
+    <div class="npc" style="left:900px;top:800px">🍹</div>
+    <div class="npc" style="left:2000px;top:500px">🏪</div>
+    <div class="npc" style="left:2500px;top:2000px">🌳</div>
+  </div>
+</div>
+
+<script>
+let player=document.getElementById('player')
+let motor=document.getElementById('motor')
+let world=document.getElementById('world')
+let timerEl=document.getElementById('timer')
+let energyEl=document.getElementById('energy')
+let scoreEl=document.getElementById('score')
+let moneyEl=document.getElementById('money')
+let motorStatus=document.getElementById('motorStatus')
+
+let x=1500,y=1500
+let speed=5
+let riding=false
+let energy=100,score=0,money=30,time=240
+let keys={}
+
+player.style.left=x+'px'
+player.style.top=y+'px'
+
+window.addEventListener('keydown',e=>keys[e.key]=true)
+window.addEventListener('keyup',e=>keys[e.key]=false)
+
+function update(){
+ if(keys['w']||keys['ArrowUp']) y-=speed
+ if(keys['s']||keys['ArrowDown']) y+=speed
+ if(keys['a']||keys['ArrowLeft']) x-=speed
+ if(keys['d']||keys['ArrowRight']) x+=speed
+
+ x=Math.max(0,Math.min(2960,x))
+ y=Math.max(0,Math.min(2940,y))
+
+ player.style.left=x+'px'
+ player.style.top=y+'px'
+
+ if(riding){
+   motor.style.left=x-15+'px'
+   motor.style.top=y+20+'px'
+ }
+
+ world.style.left=window.innerWidth/2 - x -20 +'px'
+ world.style.top=window.innerHeight/2 - y -30 +'px'
+
+ requestAnimationFrame(update)
+}
+
+function gameLoop(){
+ time--
+ if(time<=0){
+   alert('Adzan Maghrib! Skor kamu: '+score)
+   location.reload()
+ }
+ timerEl.textContent=time
+ energyEl.textContent=energy
+ scoreEl.textContent=score
+ moneyEl.textContent=money
+ motorStatus.textContent=riding?'Ya':'Tidak'
+}
+
+setInterval(gameLoop,1000)
+update()
+
+window.addEventListener('keypress',e=>{
+ if(e.key==='e'){
+   if(Math.abs(x-1200)<100 && Math.abs(y-1200)<100 && !riding){
+     riding=true
+     speed=12
+     alert('Kamu naik motor! 🏍️ Speed meningkat!')
+   }
+   else if(riding){
+     riding=false
+     speed=5
+     alert('Kamu turun dari motor')
+   }
+
+   if(Math.abs(x-400)<100 && Math.abs(y-300)<100){
+     score+=40
+     energy-=5
+     alert('Ngaji di masjid +40 pahala')
+   }
+
+   if(Math.abs(x-900)<100 && Math.abs(y-800)<100){
+     if(money>=5){
+       money-=5
+       energy=Math.min(100,energy+20)
+       alert('Beli takjil +20 energi')
+     }
+   }
+ }
+})
+</script>
+
+</body>
+</html>
